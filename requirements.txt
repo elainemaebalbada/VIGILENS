@@ -1,0 +1,8 @@
+numpy>=1.26,<2.0
+opencv-python>=4.8,<5.0
+dlib>=19.24
+customtkinter>=5.2
+matplotlib>=3.8
+pygame>=2.5
+Pillow>=10.0
+pytest>=8.0
