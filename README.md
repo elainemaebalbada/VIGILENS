@@ -295,10 +295,8 @@ VIGILENS/
 ├── vision/
 │
 ├── ui/
-│   ├── app.py
-│   ├── components/
-│   └── pages/
-│
+│   └── app.py
+│ 
 ├── tests/
 │
 └── data/
