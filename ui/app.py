@@ -1,4 +1,3 @@
-
 """VIGILENS desktop application. UI polling never accesses the webcam directly."""
 import os
 import tkinter as tk
@@ -19,16 +18,16 @@ from services.settings_service import SettingsService, AppSettings, SettingsVali
 
 
 # Midnight Teal Theme - Accessibility Revised
-BG = "#EDF2F1"          # cool, soft background
-NAVY = "#173B3A"        # deep teal for navigation and headings
-SLATE = "#285B59"       # primary controls
-TEAL = "#8EDBD0"        # signature teal accent
-RED = "#B64D4D"         # higher-contrast alert color
-WHITE = "#FAFCFB"       # soft white panels
-TEXT = "#263F3E"        # primary text
-MUTED = "#526B67"       # darker, readable secondary text
-BORDER = "#D8E4E1"      # subtle panel borders
-HOVER = "#34716D"       # button and navigation hover
+BG = "#EDF2F1"
+NAVY = "#173B3A"
+SLATE = "#285B59"
+TEAL = "#8EDBD0"
+RED = "#B64D4D"
+WHITE = "#FAFCFB"
+TEXT = "#263F3E"
+MUTED = "#526B67"
+BORDER = "#D8E4E1"
+HOVER = "#34716D"
 
 
 class VigilensApp(ctk.CTk):
@@ -86,14 +85,14 @@ class VigilensApp(ctk.CTk):
         for name, symbol in [
             ("Dashboard", "⌂"),
             ("Live Monitoring", "◉"),
-            ("Session History", "▤"),
-            ("Analytics", "▥"),
-            ("Settings", "⚙"),
+            ("Session History", "📂"),
+            ("Analytics", "📈"),
+            ("Settings", "⛭"),
             ("About", "ⓘ")
         ]:
             btn = ctk.CTkButton(
                 self.sidebar,
-                text=f"  {symbol}    {name}",
+                text=f"  {symbol}     {name}",
                 anchor="w",
                 height=44,
                 fg_color="transparent",
@@ -208,8 +207,6 @@ class VigilensApp(ctk.CTk):
                     else "CAMERA STARTING"
                 )
                 text = f"●  MONITORING {snap.state}  •  {camera_text}"
-
-                # Use a darker color for readable text on the light header.
                 color = SLATE if snap.camera_ok else MUTED
             else:
                 text = "●  MONITORING STOPPED  •  CAMERA INACTIVE"
@@ -233,19 +230,15 @@ class VigilensApp(ctk.CTk):
         return frame
 
     def _section(self, parent, title, subtitle=None):
-        ctk.CTkLabel(
-            parent,
-            text=title,
-            text_color=NAVY,
-            font=ctk.CTkFont(size=25, weight="bold")
-        ).pack(anchor="w", pady=(0, 4))
-
+        """Display the page description once below the main header."""
         if subtitle:
             ctk.CTkLabel(
                 parent,
                 text=subtitle,
                 text_color=MUTED,
-                font=ctk.CTkFont(size=13)
+                font=ctk.CTkFont(size=13),
+                wraplength=900,
+                justify="left"
             ).pack(anchor="w", pady=(0, 20))
 
     def _card(self, parent, title, value, note=""):
@@ -464,59 +457,98 @@ class VigilensApp(ctk.CTk):
         )
 
         body = ctk.CTkFrame(
-            f, fg_color="transparent"
+            f,
+            fg_color="transparent"
         )
         body.pack(fill="both", expand=True)
-        body.grid_columnconfigure(0, weight=3)
-        body.grid_columnconfigure(1, weight=2)
+
+        body.grid_columnconfigure(0, weight=1)
+        body.grid_columnconfigure(1, weight=0, minsize=350)
+        body.grid_rowconfigure(0, weight=1)
 
         video_card = ctk.CTkFrame(
-            body, fg_color=NAVY, corner_radius=12
+            body,
+            fg_color=NAVY,
+            corner_radius=12
         )
         video_card.grid(
-            row=0, column=0, sticky="nsew", padx=(0, 12)
+            row=0,
+            column=0,
+            sticky="nsew",
+            padx=(0, 12)
         )
+
+        video_card.grid_columnconfigure(0, weight=1)
+        video_card.grid_rowconfigure(0, weight=1)
 
         self.video_label = ctk.CTkLabel(
             video_card,
             text="Camera preview will appear here\n\nPress Start Monitoring",
             text_color="#E0ECE9",
             font=ctk.CTkFont(size=16),
-            height=390
+            width=760,
+            height=470
         )
         self.video_label.pack(
-            fill="both", expand=True, padx=12, pady=12
+            fill="both",
+            expand=True,
+            padx=12,
+            pady=12
         )
 
         right = ctk.CTkFrame(
-            body, fg_color="transparent"
+            body,
+            fg_color="transparent",
+            width=350
         )
-        right.grid(row=0, column=1, sticky="nsew")
+        right.grid(
+            row=0,
+            column=1,
+            sticky="nsew"
+        )
+        right.grid_propagate(False)
 
         status = ctk.CTkFrame(
             right,
             fg_color=WHITE,
             corner_radius=12,
             border_width=1,
-            border_color=BORDER
+            border_color=BORDER,
+            width=350,
+            height=105
         )
-        status.pack(fill="x", pady=(0, 10))
+        status.pack(
+            fill="x",
+            pady=(0, 10)
+        )
+        status.pack_propagate(False)
 
         ctk.CTkLabel(
             status,
             text="CURRENT STATUS",
             text_color=MUTED,
             font=ctk.CTkFont(size=11, weight="bold")
-        ).pack(anchor="w", padx=17, pady=(15, 5))
+        ).pack(
+            anchor="w",
+            padx=17,
+            pady=(15, 5)
+        )
 
         self.status_value = ctk.CTkLabel(
             status,
             text="NOT MONITORING",
             text_color=MUTED,
-            font=ctk.CTkFont(size=20, weight="bold")
+            font=ctk.CTkFont(size=18, weight="bold"),
+            width=310,
+            height=32,
+            anchor="w",
+            wraplength=310,
+            justify="left"
         )
         self.status_value.pack(
-            anchor="w", padx=17, pady=(0, 15)
+            anchor="w",
+            padx=17,
+            pady=(0, 10)
         )
 
         metrics = ctk.CTkFrame(
@@ -526,11 +558,14 @@ class VigilensApp(ctk.CTk):
             border_width=1,
             border_color=BORDER
         )
-        metrics.pack(fill="x", pady=10)
+        metrics.pack(
+            fill="x",
+            pady=10
+        )
 
         self.metric_labels = {}
 
-        for key, label in [
+        metric_rows = [
             ("eye_status", "Eye Status"),
             ("ear", "Eye Aspect Ratio"),
             ("mar", "Mouth Aspect Ratio"),
@@ -539,25 +574,42 @@ class VigilensApp(ctk.CTk):
             ("alerts", "Drowsiness alerts"),
             ("yawns", "Possible yawns"),
             ("fps", "Processing FPS")
-        ]:
+        ]
+
+        for key, label in metric_rows:
             row = ctk.CTkFrame(
-                metrics, fg_color="transparent"
+                metrics,
+                fg_color="transparent",
+                height=32
             )
-            row.pack(fill="x", padx=16, pady=7)
+            row.pack(
+                fill="x",
+                padx=16,
+                pady=5
+            )
+            row.pack_propagate(False)
 
             ctk.CTkLabel(
                 row,
                 text=label,
-                text_color=MUTED
-            ).pack(side="left")
+                text_color=MUTED,
+                anchor="w"
+            ).pack(
+                side="left",
+                fill="x",
+                expand=True
+            )
 
             val = ctk.CTkLabel(
                 row,
                 text="—",
                 text_color=NAVY,
-                font=ctk.CTkFont(size=14, weight="bold")
+                font=ctk.CTkFont(size=14, weight="bold"),
+                width=105,
+                anchor="e"
             )
             val.pack(side="right")
+
             self.metric_labels[key] = val
 
         controls = ctk.CTkFrame(
@@ -567,7 +619,10 @@ class VigilensApp(ctk.CTk):
             border_width=1,
             border_color=BORDER
         )
-        controls.pack(fill="x", pady=10)
+        controls.pack(
+            fill="x",
+            pady=10
+        )
 
         self.start_btn = ctk.CTkButton(
             controls,
@@ -577,7 +632,9 @@ class VigilensApp(ctk.CTk):
             command=self._start_monitoring
         )
         self.start_btn.pack(
-            fill="x", padx=16, pady=(16, 8)
+            fill="x",
+            padx=16,
+            pady=(16, 8)
         )
 
         self.stop_btn = ctk.CTkButton(
@@ -589,16 +646,26 @@ class VigilensApp(ctk.CTk):
             state="disabled"
         )
         self.stop_btn.pack(
-            fill="x", padx=16, pady=(0, 16)
+            fill="x",
+            padx=16,
+            pady=(0, 16)
         )
 
         self.live_message = ctk.CTkLabel(
             f,
-            text="Audio alerts: enabled" if self.settings.audio_enabled else "Audio alerts: disabled",
+            text=(
+                "Audio alerts: enabled"
+                if self.settings.audio_enabled
+                else "Audio alerts: disabled"
+            ),
             text_color=MUTED,
-            anchor="w"
+            anchor="w",
+            wraplength=1000
         )
-        self.live_message.pack(fill="x", pady=8)
+        self.live_message.pack(
+            fill="x",
+            pady=8
+        )
 
         self._poll_monitor()
 
