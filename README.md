@@ -1,22 +1,28 @@
 # VIGILENS
-**Visual Monitoring for Driver Alertness**
+### Visual Monitoring for Driver Alertness
 
-VIGILENS is an educational Python desktop application that uses a webcam and classical computer-vision techniques to monitor visible facial indicators associated with possible drowsiness. It detects faces using OpenCV Haar Cascade, estimates 68 facial landmarks using dlib, calculates Eye Aspect Ratio (EAR) and Mouth Aspect Ratio (MAR), and monitors prolonged eye closure over time.
+**A Real-Time Webcam-Based Driver Alertness Monitoring and Drowsiness Detection Application Using Computer Vision**
 
-> **Safety Notice:** VIGILENS is an educational prototype. It is not a medical diagnostic tool or certified driver-safety system, and it cannot guarantee accident prevention. It must not be used as a substitute for adequate rest or responsible driving decisions.
+VIGILENS is an educational Python desktop application that uses a webcam and classical computer-vision techniques to monitor visible facial indicators associated with possible driver drowsiness. It detects faces using OpenCV's Haar Cascade Classifier, identifies facial landmarks using dlib's 68-point facial landmark predictor, and calculates the Eye Aspect Ratio (EAR) and Mouth Aspect Ratio (MAR) to monitor eye closure and sustained mouth opening.
+
+The application provides real-time monitoring, visual and audio alerts, session recording, detection history, and analytics through a desktop graphical interface.
+
+> **Safety Notice:** VIGILENS is an educational prototype and is not a medical diagnostic tool or certified driver-safety system. It cannot guarantee driver alertness or prevent accidents. It must not replace adequate rest, responsible driving, or professional safety systems.
+
+---
 
 ## 1. Features
 
 - **Real-Time Webcam Monitoring** – Captures and processes webcam frames to monitor visible facial indicators.
-- **Face Detection** – Uses OpenCV Haar Cascade Classifier to locate the face.
+- **Face Detection** – Uses OpenCV Haar Cascade Classifier to detect the face.
 - **Facial Landmark Detection** – Uses dlib's pretrained 68-point facial landmark predictor to identify facial feature positions.
 - **Eye Aspect Ratio (EAR)** – Measures eye openness to identify possible eye closure.
 - **Mouth Aspect Ratio (MAR)** – Measures mouth opening to identify possible yawning.
 - **Time-Based Drowsiness Detection** – Monitors prolonged eye closure before generating a drowsiness alert.
-- **Visual and Audio Alerts** – Provides visual status indicators and optional audio notifications.
-- **Session Recording** – Stores completed monitoring sessions and their detection events.
-- **Session History** – Allows users to review recorded sessions and their associated events.
-- **Analytics** – Presents summaries, event statistics, and EAR measurements from recorded sessions.
+- **Visual and Audio Alerts** – Displays detection statuses and provides optional audio notifications.
+- **Session Recording** – Saves monitoring sessions, detection events, and EAR measurements in a local database.
+- **Session History** – Allows users to review completed monitoring sessions and their recorded events.
+- **Analytics** – Presents session statistics, recorded events, and EAR measurements over time.
 - **Configurable Settings** – Allows users to adjust detection thresholds, eye-closure duration, camera index, and audio preferences.
 
 ## 2. Computer Vision Topics Implemented
@@ -25,58 +31,72 @@ VIGILENS implements four computer-vision topics using Python and classical compu
 
 ### 2.1 Image Operations
 
-Image operations are applied to webcam frames before and during processing.
+Image operations are applied to webcam frames during preprocessing and visualization.
 
 Implemented operations include:
-- Grayscale conversion for face detection.
 - Image resizing to manage frame dimensions and processing.
+- Grayscale conversion for face detection.
 - Histogram equalization to improve image contrast.
-- Image annotation and overlays for displaying detection results.
+- Image flipping, annotations, and overlays for displaying monitoring results.
 
 ### 2.2 Haar Cascade Classifier
 
 The application uses OpenCV's Haar Cascade Classifier for face detection.
 
-The classifier processes grayscale webcam frames to locate visible faces. The detected face region is used as the basis for subsequent facial landmark detection.
+The classifier processes grayscale webcam frames to locate visible faces. When multiple face regions are detected, the application selects the largest detected face for subsequent facial landmark analysis.
 
 ### 2.3 Image Analysis and Transformation
 
-VIGILENS analyzes facial measurements using geometric calculations.
+VIGILENS analyzes facial measurements using geometric calculations and NumPy.
 
 **Eye Aspect Ratio (EAR)**
 
-EAR estimates eye openness using distances between selected eye landmarks. A lower EAR value can indicate that the eyes are closing.
+EAR estimates eye openness using distances between selected eye landmarks. Lower EAR values indicate possible eye closure.
 
 **Mouth Aspect Ratio (MAR)**
 
-MAR estimates mouth opening using selected mouth landmarks. A higher MAR value can indicate a possible yawning event.
+MAR estimates mouth opening using selected mouth landmarks. Higher MAR values indicate sustained mouth opening that may be associated with yawning.
 
-The application also monitors eye-closure duration to determine whether prolonged eye closure should trigger a drowsiness alert.
+The application also monitors eye-closure duration to determine whether the configured condition for a drowsiness alert has been reached.
 
 ### 2.4 Facial Landmark Detection
 
 The application uses dlib's pretrained 68-point facial landmark predictor.
 
-The predictor identifies facial landmark positions, including points around the eyes, eyebrows, nose, and mouth. These landmarks provide the coordinates used for EAR and MAR calculations.
+The predictor identifies facial landmark positions around the eyes, eyebrows, nose, and mouth. These coordinates are used to calculate EAR and MAR.
 
-**Note:** Image segmentation and motion/object tracking are not claimed as implemented features.
+**Note:** Image segmentation and motion/object tracking are not implemented features of this project.
 
 ## 3. How the Application Works
 
 The VIGILENS monitoring process follows these steps:
 
-1. **Webcam Capture** – The application captures video frames from the selected webcam.
-2. **Image Preprocessing** – Frames are converted to grayscale and prepared for face detection.
-3. **Face Detection** – Haar Cascade identifies the face region.
-4. **Facial Landmark Detection** – dlib estimates the 68 facial landmark positions.
-5. **Measurement Calculation** – EAR and MAR are calculated using the detected landmarks.
-6. **Drowsiness Monitoring** – The application monitors eye-closure duration over time.
-7. **Alert Generation** – A drowsiness alert is generated when the configured eye-closure condition is met.
-8. **Event and Session Recording** – Monitoring events and session information are stored in the local SQLite database.
+1. **Webcam Capture** – Captures video frames from the selected webcam.
+2. **Image Preprocessing** – Resizes and converts frames to grayscale for face detection.
+3. **Face Detection** – Uses Haar Cascade to identify the face region.
+4. **Facial Landmark Detection** – Uses dlib to estimate 68 facial landmark positions.
+5. **Measurement Calculation** – Calculates EAR and MAR using the detected landmarks.
+6. **Drowsiness Monitoring** – Evaluates eye-closure measurements over time using a smoothing process.
+7. **Alert Generation** – Generates a drowsiness alert when the configured eye-closure condition is met.
+8. **Event and Session Recording** – Saves monitoring information and detection events in the local SQLite database.
 
-Yawning is recorded as a possible secondary indicator and does not independently trigger a drowsiness alert.
+Possible yawning events are recorded as a secondary indicator. Yawning does not independently trigger a drowsiness alert.
 
-## 4. Technology Stack
+## 4. Detection Parameters
+
+The application uses configurable threshold values to evaluate facial measurements.
+
+| Parameter | Default Value | Description |
+|---|---:|---|
+| EAR Threshold | 0.21 | Values below this threshold indicate possible eye closure. |
+| MAR Threshold | 0.60 | Values above this threshold indicate sustained mouth opening. |
+| Eye-Closure Duration | 2.0 seconds | Required eye-closure duration before a drowsiness alert is triggered. |
+| Yawn Duration | 1.0 second | Required sustained mouth-opening duration for a possible yawn event. |
+| Smoothing Window | 3 measurements | Number of measurements used to smooth detection values. |
+
+These are configurable starting values, not universal measurements. Users can manually adjust the EAR and MAR thresholds and other available settings through the application.
+
+## 5. Technology Stack
 
 | Technology | Purpose |
 |---|---|
@@ -90,31 +110,40 @@ Yawning is recorded as a possible secondary indicator and does not independently
 | Matplotlib | Analytics charts |
 | SQLite | Local database storage |
 | pygame | Audio alert playback |
+| pytest | Automated testing |
 
-## 5. System Requirements
+## 6. System Requirements
 
 - Windows 10 or Windows 11 recommended.
-- Python 3.10 or 3.11 recommended for compatibility with dlib.
+- Python 3.11 recommended.
 - A working webcam.
-- Microphone access is not required.
-- Speakers or headphones are recommended for audio alerts.
+- Speakers or headphones recommended for audio alerts.
 - Sufficient storage for the application, dependencies, and facial landmark model.
+- Internet connection for initial dependency and model downloads.
 
-## 6. Installation and Setup
+## 7. Installation and Setup
 
-### 6.1 Extract the Project
+### 7.1 Clone the Repository
 
-Extract the complete VIGILENS project folder and open it in Visual Studio Code.
+Open PowerShell or the VS Code terminal and run:
 
-### 6.2 Create a Virtual Environment
+```powershell
+git clone https://github.com/elainemaebalbada/VIGILENS.git
+```
 
-Open the VS Code terminal and run:
+Navigate to the project folder:
+
+```powershell
+cd VIGILENS
+```
+
+### 7.2 Create a Virtual Environment
 
 ```powershell
 py -3.11 -m venv .venv
 ```
 
-### 6.3 Activate the Virtual Environment
+### 7.3 Activate the Virtual Environment
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
@@ -126,9 +155,9 @@ If PowerShell blocks script execution, run:
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
 ```
 
-Then activate the environment again.
+Then activate the virtual environment again.
 
-### 6.4 Install Dependencies
+### 7.4 Install Dependencies
 
 Upgrade pip:
 
@@ -142,19 +171,41 @@ Install the required packages:
 pip install -r requirements.txt
 ```
 
-### 6.5 dlib Installation Note
+### 7.5 dlib Installation Note
 
-On Windows, dlib may require CMake and Microsoft Visual C++ Build Tools if a compatible prebuilt package is unavailable.
+The dlib package may require CMake and Microsoft Visual C++ Build Tools when a compatible prebuilt package is unavailable on Windows.
 
-If installation fails, install the required C++ build tools and CMake, then retry the installation. Use a Python version compatible with the available dlib build environment.
+If installation fails, install the required build tools and CMake, then retry the installation.
 
-## 7. Facial Landmark Model
+## 8. Facial Landmark Model Setup
 
-VIGILENS uses the pretrained dlib 68-point facial landmark predictor:
+VIGILENS requires dlib's pretrained 68-point facial landmark predictor:
 
 `shape_predictor_68_face_landmarks.dat`
 
-The model is included in the supplied project archive under:
+**The model file is not included in this GitHub repository because of its large file size. It must be downloaded and placed in the project folder before running the application.**
+
+### Step 1: Download the Model
+
+Download the compressed model from the official dlib files page:
+
+[Download the 68-point facial landmark predictor (.bz2)](http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2)
+
+### Step 2: Extract the File
+
+The downloaded file is compressed in `.bz2` format. Extract it using an archive utility such as 7-Zip.
+
+The extracted file must be named:
+
+`shape_predictor_68_face_landmarks.dat`
+
+### Step 3: Create the Models Folder
+
+Inside the main VIGILENS project directory, create a folder named `models`.
+
+Place the extracted `.dat` file inside it.
+
+The final directory should look like this:
 
 ```text
 VIGILENS/
@@ -162,69 +213,69 @@ VIGILENS/
     └── shape_predictor_68_face_landmarks.dat
 ```
 
-The model is required for facial landmark detection and live monitoring. Do not delete or rename this file.
+**Important:** Make sure the extracted `.dat` file is inside the `models` folder. The compressed `.bz2` file alone is not sufficient for the application.
 
-## 8. Running the Application
+## 9. Running the Application
 
-Make sure the virtual environment is activated and all dependencies are installed.
+After completing the installation and model setup, make sure the virtual environment is activated.
 
-From the project root, run:
+From the main VIGILENS project directory, run:
 
 ```powershell
 python main.py
 ```
 
-The application will open the VIGILENS desktop interface.
+The VIGILENS desktop application will launch.
 
-The SQLite database is created automatically at:
+The application automatically creates its local SQLite database when needed. The database is stored at:
 
 ```text
-data/vigilens.db
+data/
+└── vigilens.db
 ```
 
-The database stores local application settings, monitoring sessions, detection events, and periodic EAR samples.
+The database stores application settings, monitoring sessions, detection events, and periodic EAR measurements.
 
-## 9. Using VIGILENS
+## 10. Using VIGILENS
 
-1. Open **Settings** to review the camera index and detection thresholds.
-2. Select **Live Monitoring** from the sidebar.
-3. Press **Start Monitoring** to initialize the webcam and facial landmark model.
-4. Position your face within the camera view and ensure adequate lighting.
-5. Observe the displayed facial measurements and monitoring status.
-6. Press **Stop Monitoring** to end the session and save its recorded information.
-7. Open **Session History** to review completed sessions and their events.
-8. Open **Analytics** to review session statistics and measurement charts.
+1. Launch the application using `python main.py`.
+2. Open **Settings** to review the camera index, detection thresholds, and audio preferences.
+3. Navigate to **Live Monitoring**.
+4. Click **Start Monitoring** to initialize the webcam and detection process.
+5. Position your face within the camera view and ensure adequate lighting.
+6. Observe the displayed facial measurements and monitoring status.
+7. Click **Stop Monitoring** to end the session and save its recorded information.
+8. Open **Session History** to review completed sessions and their recorded events.
+9. Open **Analytics** to review session statistics and measurement charts.
 
-Detection thresholds are configurable starting values and are not universal measurements. They should be evaluated under controlled conditions using the intended webcam and lighting environment.
-
-## 10. Application Pages
+## 11. Application Pages
 
 | Page | Description |
 |---|---|
-| Dashboard | Displays completed-session statistics, recorded events, camera status, and the latest completed session. |
-| Live Monitoring | Displays the webcam preview, facial measurements, eye status, monitoring status, and alert controls. |
+| Dashboard | Displays system status, completed-session statistics, recorded events, and the latest completed session. |
+| Live Monitoring | Displays the webcam preview, facial measurements, eye status, monitoring status, and alerts. |
 | Session History | Displays completed monitoring sessions and their recorded detection events. |
 | Analytics | Presents session summaries, event statistics, and EAR trend charts. |
 | Settings | Allows users to configure detection thresholds, camera index, and audio preferences. |
-| About | Provides the project overview, objectives, implemented computer-vision topics, technologies, instructions, and limitations. |
+| About | Provides the project overview, objectives, computer-vision topics, technology stack, instructions, and limitations. |
 
-## 11. Database and Session Management
+## 12. Database and Session Management
 
 VIGILENS uses SQLite for local data storage.
 
-The database includes records for:
-- Monitoring sessions.
-- Detection events.
+The database maintains:
+- Monitoring session records.
+- Drowsiness alert and possible yawning events.
 - Periodic EAR measurements.
 - Application settings.
 
 Only completed sessions are included in the completed-session statistics.
 
-Session IDs are automatically generated by SQLite. Consequently, session IDs may not match the total number of currently stored sessions, particularly when records have been deleted. This is expected database behavior.
+Session IDs are automatically generated by SQLite. Therefore, session IDs may not match the total number of currently stored sessions, particularly when records have been deleted.
 
 The database is stored locally and is not automatically synchronized with an external server.
 
-## 12. Testing
+## 13. Testing
 
 The project includes automated tests for its supporting components.
 
@@ -245,68 +296,85 @@ The tests cover:
 - Alert service behavior.
 - UI structure.
 
-Automated tests do not replace testing with an actual webcam, the supplied facial landmark model, and real audio hardware.
+Automated tests do not replace testing with an actual webcam, the facial landmark model, and audio hardware.
 
-## 13. Known Limitations
+## 14. Known Limitations
 
 VIGILENS is an educational computer-vision prototype and has the following limitations:
 
-- Detection performance may be affected by poor lighting.
+- Detection performance may be affected by poor lighting conditions.
 - Glasses, reflections, and facial occlusion may affect landmark detection.
 - Head rotation and camera positioning may reduce detection reliability.
 - Webcam quality and individual facial differences may affect measurements.
 - The application is designed for single-face monitoring.
 - Yawning is treated as a secondary indicator and does not independently trigger a drowsiness alert.
-- EAR and MAR values are visual measurements and do not establish a medical diagnosis.
-- The system cannot guarantee that a driver is alert or prevent accidents.
+- EAR and MAR measurements do not establish a medical diagnosis.
+- The system cannot guarantee driver alertness or prevent accidents.
 
-## 14. Privacy
+## 15. Privacy
 
 VIGILENS stores session summaries, detection events, application settings, and periodic EAR measurements in a local SQLite database.
 
 The application does not intentionally save webcam video recordings or facial photographs.
 
-Users are responsible for protecting the local project folder and database files.
+Users are responsible for protecting their local project folder and database files.
 
-## 15. Project Structure
+## 16. Application Screenshots
 
-```text
-VIGILENS/
-│
-├── main.py
-├── config.py
-├── requirements.txt
-├── README.md
-│
-├── assets/
-│   └── sounds/
-│       ├── alarm.wav
-│       └── beep.wav
-│
-├── models/
-│   └── shape_predictor_68_face_landmarks.dat
-│
-├── database/
-│   ├── database.py
-│   └── schema.sql
-│
-├── services/
-│
-├── vision/
-│
-├── ui/
-│   └── app.py
-│ 
-├── tests/
-│
-└── data/
-    └── vigilens.db
-```
+The following screenshots demonstrate the main interface and monitoring functions of VIGILENS.
 
-The `data/` directory and SQLite database are generated locally when the application runs for the first time.
+### Dashboard
+
+![VIGILENS Dashboard](screenshots/dashboard.png)
+
+### Live Monitoring
+
+**Normal Status**
+
+![Normal Status](screenshots/live_monitoring_normalStatus.png)
+
+**Eyes Closed Status**
+
+![Eyes Closed Status](screenshots/live_monitoring_eyesClosedStatus.png)
+
+**Yawning Status**
+
+![Yawning Status](screenshots/live_monitoring_yawningStatus.png)
+
+**Drowsiness Alert**
+
+![Drowsiness Alert](screenshots/live_monitoring_drowsinessAlertStatus.png)
+
+### Session History
+
+![Session History](screenshots/sessionHistory.png)
+
+**View Session Events – Session #53**
+
+![Session Events](screenshots/sessionHistory_viewEvents_Session53.png)
+
+### Analytics
+
+![Analytics Overview](screenshots/analytics.png)
+
+![Analytics Continuation](screenshots/analytics_continuation.png)
+
+### Settings
+
+![VIGILENS Settings](screenshots/settings.png)
+
+### About
+
+![VIGILENS About](screenshots/about.png)
 
 ---
 
-**VIGILENS — Visual Monitoring for Driver Alertness**
+**VIGILENS – Visual Monitoring for Driver Alertness**
 
-*Educational Computer Vision Project | CSC 126*
+Educational Computer Vision Project | CSC 126
+
+Developed by:
+
+- Balbada, Elaine Mae M.
+- Calderon, Kiesha Jae T.
+- Manatad Jr., Peter Paul S.
